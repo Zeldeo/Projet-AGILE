@@ -167,6 +167,7 @@ padding-left: 30px;}
 .arrow.right {
   right: -20px;
 }
+
 /* #result {
       background: white;
       border-radius: 10px;
@@ -229,3 +230,42 @@ form input, form textarea {
   border-radius: 8px; 
   border: 1px solid #e6eefc; }
 form button { margin-top: 12px; }
+
+
+
+
+/* -------------------------------------------------- */
+/*           🎯 CAROUSEL INFINI "NOS PARTENAIRES"      */
+/* -------------------------------------------------- */
+
+.partners-carousel {
+  overflow: hidden;
+  width: 100%;
+  padding: 20px 0;
+}
+
+
+.partners-track {
+  display: flex;
+  gap: 60px;
+  animation: scroll 30s linear infinite;
+  flex-wrap: nowrap; /* important */
+}
+
+
+.partners-track img {
+  height: 70px;
+  object-fit: contain;
+  opacity: 0.9;
+  transition: transform 0.3s ease;
+}
+
+.partners-track img:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* scroll exactly half because we repeated logos */
+}
