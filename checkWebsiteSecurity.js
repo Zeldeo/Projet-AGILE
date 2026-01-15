@@ -1,103 +1,112 @@
 /**
  * checkWebsiteSecurity.js
  * 
- * Vérifie la sécurité d'un site Web selon plusieurs critères :
- * - Structure de l’URL (HTTPS, nom de domaine, extension, caractères suspects)
- * - Réponse du serveur
- * - Quelques vérifications visuelles simples (basées sur le HTML récupéré)
- * 
- * ⚠️ Note : certaines vérifications (comme l'apparence visuelle ou les pop-ups)
- * ne sont faisables que côté navigateur avec une inspection directe du DOM.
+ * Fonctionnalités :
+ * - Calcul du cyberscore pondéré (/100)
+ * - Sauvegarde locale dans un tableau
+ * - Top 5 dynamique basé sur un fichier JSON externe
  */
 
+let cyberscoreHistory = [];
+
+// Charger le JSON externe
+async function loadCyberscoreJSON() {
+    try {
+        const response = await fetch('cyberscores.json'); // chemin vers ton JSON
+        if (!response.ok) throw new Error('Impossible de charger le JSON');
+        const data = await response.json();
+        cyberscoreHistory = data; // mettre à jour le tableau local
+    } catch (err) {
+        console.error(err);
+        cyberscoreHistory = []; // si erreur, tableau vide
+    }
+}
+
+// Fonction principale de vérification
 async function checkWebsiteSecurity(url) {
-    let score = 100;
+    const coeff = { https: 0.30, suspiciousWord: 0.10, extension: 0.15, weirdChars: 0.25, response: 0.20 };
+    let httpsScore = 0, suspiciousScore = 100, extScore = 100, charScore = 100, responseScore = 100;
     const report = [];
 
     try {
-      const urlObj = new URL(url);
-      const hostname = urlObj.hostname;
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname;
 
-      // 1️⃣ HTTPS
-      if (urlObj.protocol !== "https:") {
-        score -= 30;
-        report.push("❌ Le site n'utilise pas HTTPS.");
-      } else {
-        report.push("✅ Le site utilise HTTPS.");
-      }
+        // HTTPS
+        httpsScore = urlObj.protocol === "https:" ? 100 : 0;
+        report.push(httpsScore === 100 ? "✅ Le site utilise HTTPS." : "❌ Le site n'utilise pas HTTPS.");
 
-      // 2️⃣ Mots suspects
-      const suspiciousPatterns = ["secure", "verif", "connexion", "login", "update", "support", "confirm"];
-      const hasSuspiciousWord = suspiciousPatterns.some(word => hostname.includes(word));
-      if (hasSuspiciousWord) {
-        score -= 10;
-        report.push("⚠️ Le nom de domaine contient un mot suspect.");
-      } else {
-        report.push("✅ Aucun mot suspect dans le nom de domaine.");
-      }
+        // Mots suspects
+        const suspiciousPatterns = ["secure","verif","connexion","login","update","support","confirm"];
+        const hasSuspiciousWord = suspiciousPatterns.some(word => hostname.includes(word));
+        suspiciousScore = hasSuspiciousWord ? 0 : 100;
+        report.push(hasSuspiciousWord ? "⚠️ Le nom de domaine contient un mot suspect." : "✅ Aucun mot suspect.");
 
-      // 3️⃣ Extension
-      const parts = hostname.split(".");
-      const ext = parts[parts.length - 1];
-      const trusted = ["com", "fr", "org", "edu", "net", "gov"];
-      if (!trusted.includes(ext)) {
-        score -= 5;
-        report.push(`⚠️ Extension de domaine peu commune (.${ext}).`);
-      } else {
-        report.push(`✅ Extension de domaine fiable (.${ext}).`);
-      }
+        // Extension
+        const parts = hostname.split(".");
+        const ext = parts[parts.length-1];
+        const trusted = ["com","fr","org","edu","net","gov"];
+        extScore = trusted.includes(ext) ? 100 : 50;
+        report.push(trusted.includes(ext) ? `✅ Extension fiable (.${ext}).` : `⚠️ Extension peu commune (.${ext}).`);
 
-      // 4️⃣ Caractères étranges
-      const weirdChars = /[àâäéèêëïîôöùûüç]|[^a-zA-Z0-9\.\-]/.test(hostname);
-      if (weirdChars) {
-        score -= 20;
-        report.push("❌ Le domaine contient des caractères suspects (accentués ou spéciaux).");
-      } else {
-        report.push("✅ Aucun caractère suspect détecté.");
-      }
+        // Caractères étranges
+        const weirdChars = /[àâäéèêëïîôöùûüç]|[^a-zA-Z0-9\.\-]/.test(hostname);
+        charScore = weirdChars ? 0 : 100;
+        report.push(weirdChars ? "❌ Caractères suspects." : "✅ Aucun caractère suspect.");
 
-      // 5️⃣ Réponse du site
-      try {
-        await fetch(url, { method: "HEAD", mode: "no-cors" });
-        report.push("✅ Le site répond au ping HTTP.");
-      } catch {
-        score -= 10;
-        report.push("⚠️ Impossible d'accéder au site (erreur réseau ou certificat).");
-      }
+        // Réponse du site
+        try { await fetch(url, { method:"HEAD", mode:"no-cors" }); responseScore=100; report.push("✅ Site répond."); }
+        catch { responseScore=0; report.push("⚠️ Impossible d'accéder au site."); }
 
-      report.push("ℹ️ Vérifiez manuellement : cadenas 🔒, mentions légales, apparence, absence de pop-ups.");
-      if (score < 0) score = 0;
+        let scoreFinal = Math.round(
+            httpsScore*coeff.https +
+            suspiciousScore*coeff.suspiciousWord +
+            extScore*coeff.extension +
+            charScore*coeff.weirdChars +
+            responseScore*coeff.response
+        );
 
-      const niveau = score >= 80 ? "Sécurisé ✅"
-                   : score >= 60 ? "Moyennement sûr ⚠️"
-                   : "Risque élevé ❌";
+        const niveau = scoreFinal>=80 ? "Sécurisé ✅" : scoreFinal>=60 ? "Moyennement sûr ⚠️" : "Risque élevé ❌";
 
-      return { url, score, niveau, details: report };
+        return { url, score: scoreFinal, niveau, details: report };
 
     } catch {
-      return { url, score: 0, niveau: "Erreur ❌", details: ["URL invalide."] };
+        return { url, score: 0, niveau: "Erreur ❌", details: ["URL invalide."] };
     }
-  }
+}
 
-  const calculateBtn = document.getElementById("calculateBtn");
-  const inputSection = document.getElementById("input-section");
-  const resultSection = document.getElementById("result-section");
-  const resultValue = document.getElementById("scoreValue");
-  const scoreLabel = document.getElementById("scoreLabel");
-  const progressBar = document.getElementById("progressBar");
-  const detailsList = document.getElementById("detailsList");
-  const backBtn = document.getElementById("backBtn");
+// -----------------------------
+// DOM Elements
+// -----------------------------
+const calculateBtn = document.getElementById("calculateBtn");
+const inputSection = document.getElementById("input-section");
+const resultSection = document.getElementById("result-section");
+const resultValue = document.getElementById("scoreValue");
+const scoreLabel = document.getElementById("scoreLabel");
+const progressBar = document.getElementById("progressBar");
+const detailsList = document.getElementById("detailsList");
+const top5List = document.getElementById("top5List");
+const backBtn = document.getElementById("backBtn");
 
-  calculateBtn.addEventListener("click", async () => {
+// -----------------------------
+// Afficher le Top 5 dynamique
+// -----------------------------
+function displayTop5() {
+    if (!top5List) return;
+    const top5 = [...cyberscoreHistory].sort((a,b)=>b.score-a.score).slice(0,5);
+    top5List.innerHTML = top5.map((item,index)=>
+        `<li><strong>#${index+1}</strong> ${item.url} - ${item.score}/100 (${item.niveau})</li>`
+    ).join("");
+}
+
+// -----------------------------
+// Bouton calcul
+// -----------------------------
+calculateBtn.addEventListener("click", async () => {
     const input = document.getElementById("calcyberscore");
     const url = input.value.trim();
+    if (!url) { alert("Veuillez entrer une URL !"); return; }
 
-    if (!url) {
-      alert("Veuillez entrer une URL !");
-      return;
-    }
-
-    // Étape 1 → cacher l’input, montrer les résultats
     inputSection.style.display = "none";
     resultSection.style.display = "block";
 
@@ -107,32 +116,38 @@ async function checkWebsiteSecurity(url) {
 
     const result = await checkWebsiteSecurity(url);
 
-    // Mettre à jour l’affichage du score
+    // Ajouter dans le tableau local
+    cyberscoreHistory.push({...result, timestamp: new Date().toISOString()});
+
+    // Afficher score principal
     resultValue.textContent = `${result.score}/100`;
     scoreLabel.textContent = result.niveau;
 
-    // Barre de progression animée
-    setTimeout(() => {
-      progressBar.style.width = result.score + "%";
-      if (result.score < 60) progressBar.style.background = "#ff4e42";
-      else if (result.score < 80) progressBar.style.background = "#f7b500";
-      else progressBar.style.background = "#28a745";
-    }, 200);
+    setTimeout(()=>{
+        progressBar.style.width = result.score + "%";
+        progressBar.style.background = result.score<60?"#ff4e42":result.score<80?"#f7b500":"#28a745";
+    },200);
 
     // Détails
-    detailsList.innerHTML = result.details.map(d => `<li>${d}</li>`).join("");
-  });
+    detailsList.innerHTML = result.details.map(d=>`<li>${d}</li>`).join("");
 
-  // Bouton retour → refaire une analyse
-  backBtn.addEventListener("click", () => {
+    // Mettre à jour Top 5
+    displayTop5();
+});
+
+// -----------------------------
+// Bouton retour
+// -----------------------------
+backBtn.addEventListener("click", ()=>{
     resultSection.style.display = "none";
     inputSection.style.display = "flex";
     document.getElementById("calcyberscore").value = "";
-  });
+});
 
-// Exemple d’utilisation :
-(async () => {
-    const result = await checkWebsiteSecurity("https://www.paypa1.com/");
-    console.log("Résultat de la vérification :");
-    console.log(result);
-})();
+// -----------------------------
+// Initialisation : charger JSON et afficher Top 5
+// -----------------------------
+document.addEventListener("DOMContentLoaded", async ()=>{
+    await loadCyberscoreJSON();
+    displayTop5();
+});

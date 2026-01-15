@@ -1,0 +1,30 @@
+[
+  {
+    "url": "https://example.com",
+    "score": 87,
+    "niveau": "Sécurisé ✅",
+    "details": [
+      "✅ Le site utilise HTTPS.",
+      "✅ Aucun mot suspect dans le nom de domaine.",
+      "✅ Extension de domaine fiable (.com).",
+      "✅ Aucun caractère suspect détecté.",
+      "✅ Le site répond au ping HTTP.",
+      "ℹ️ Vérifiez manuellement : cadenas 🔒, mentions légales, apparence, absence de pop-ups."
+    ],
+    "timestamp": "2025-11-24T12:34:56.789Z"
+  },
+  {
+    "url": "http://monsite.fr",
+    "score": 65,
+    "niveau": "Moyennement sûr ⚠️",
+    "details": [
+      "❌ Le site n'utilise pas HTTPS.",
+      "✅ Aucun mot suspect dans le nom de domaine.",
+      "✅ Extension de domaine fiable (.fr).",
+      "✅ Aucun caractère suspect détecté.",
+      "✅ Le site répond au ping HTTP.",
+      "ℹ️ Vérifiez manuellement : cadenas 🔒, mentions légales, apparence, absence de pop-ups."
+    ],
+    "timestamp": "2025-11-24T12:40:12.345Z"
+  }
+]

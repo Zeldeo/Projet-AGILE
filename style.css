@@ -56,7 +56,7 @@ nav a:hover {
   background: linear-gradient(90deg, var(--blue-400), var(--blue-200));
   grid-template-columns: 1fr 480px; 
   border-radius: 10px; 
-  max-height: 550px;
+  max-height: 650px;
   gap: 40px; 
   align-items: center; }
   
