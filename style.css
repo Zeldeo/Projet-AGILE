@@ -231,7 +231,12 @@ form input, form textarea {
   border: 1px solid #e6eefc; }
 form button { margin-top: 12px; }
 
-
+#top5List {
+  padding-left: 20px;
+}
+#top5List li {
+  margin-bottom: 8px;
+}
 
 
 /* -------------------------------------------------- */

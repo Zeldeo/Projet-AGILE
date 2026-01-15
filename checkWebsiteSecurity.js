@@ -94,9 +94,17 @@ const backBtn = document.getElementById("backBtn");
 function displayTop5() {
     if (!top5List) return;
     const top5 = [...cyberscoreHistory].sort((a,b)=>b.score-a.score).slice(0,5);
-    top5List.innerHTML = top5.map((item,index)=>
-        `<li><strong>#${index+1}</strong> ${item.url} - ${item.score}/100 (${item.niveau})</li>`
-    ).join("");
+    top5List.innerHTML = top5.map((item,index)=>{
+        // Extraire le nom du domaine de l'URL
+        let domainName = item.url;
+        try {
+            const urlObj = new URL(item.url);
+            domainName = urlObj.hostname.replace('www.', '');
+        } catch {
+            domainName = item.url;
+        }
+        return `<li><strong>#${index+1}</strong> <a href="${item.url}" target="_blank">${domainName}</a> - ${item.score}/100 (${item.niveau})</li>`;
+    }).join("");
 }
 
 // -----------------------------
