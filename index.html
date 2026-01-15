@@ -7,6 +7,7 @@
   <title>CyberMetrics</title>
   <link rel="icon" href="LOGO SHIELD.png" type="image/png">
   <link rel="stylesheet" href="style.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body>
   <header>
@@ -14,16 +15,16 @@
       <img src="LOGO CyberMetrics.png" alt="LOGO CyberMetrics">
     </div>
     <nav>
-      <a href="#services">Services</a>
-      <a href="#score">Cyberscore</a>
-      <a href="#rank">Classement</a>
+      <a href="#">Cyberscore</a>
+      <a href="#top5-container">Classement</a>
+      <a href="#services">Partenaires</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
 
   <main class="container">
-    <section class="hero">
-  <div class="hero-left">
+    <section class="hero" data-aos="fade-down" data-aos-duration="500">
+  <div class="hero-left"> 
     <h2>Évaluez et améliorez le cyberscore de vos sites web</h2>
     <p>Audit automatisé et rapports clairs pour mesurer la sécurité, la confidentialité et la résilience de vos services web.</p>
 
@@ -110,7 +111,7 @@
     </div>
   </div>
 </section>
-    <section id="score" class="score-example">
+    <section id="score" class="score-example" data-aos="fade-right" data-aos-duration="500">
       <div class="score-detail">
         <h3>Score par catégorie</h3>
         <ul>
@@ -141,7 +142,7 @@
       </div> -->
     </section>
 
-    <section id="contact" class="contact">
+    <section id="contact" class="contact" data-aos="fade-up" data-aos-duration="500">
       <div class="info">
         <h2>Contactez-nous</h2>
         <p>Demandez une démo, un audit ou une offre personnalisée.</p>
@@ -167,6 +168,7 @@
     <p>© 2025 CyberMetrics. Tous droits réservés. hehe :D</p>
   </footer>
 
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="animation.js"></script>
   <script src="checkWebsiteSecurity.js"></script>
 </body>

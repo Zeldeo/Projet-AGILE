@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
 :root {
   --blue-900: #0b3a66;
   --blue-700: #1853ab;
@@ -57,7 +63,7 @@ nav a:hover {
   grid-template-columns: 1fr 480px; 
   border-radius: 10px; 
   max-height: 650px;
-  gap: 40px; 
+  gap: 0px; 
   align-items: center; }
   
 .btn { 
